@@ -1,0 +1,15 @@
+{"time":"2025-04-07T00:04:47.485727694+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.9","symlink path":"/home/ryan910702/hw1-nain9172/wandb/run-20250407_000447-tihwy7if/logs/debug-core.log"}
+{"time":"2025-04-07T00:04:47.771495735+08:00","level":"INFO","msg":"created new stream","id":"tihwy7if"}
+{"time":"2025-04-07T00:04:47.771519779+08:00","level":"INFO","msg":"stream: started","id":"tihwy7if"}
+{"time":"2025-04-07T00:04:47.771528566+08:00","level":"INFO","msg":"sender: started","stream_id":"tihwy7if"}
+{"time":"2025-04-07T00:04:47.771533532+08:00","level":"INFO","msg":"handler: started","stream_id":"tihwy7if"}
+{"time":"2025-04-07T00:04:47.771552218+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"tihwy7if"}
+{"time":"2025-04-07T00:04:48.053564842+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-04-07T00:05:55.264826281+08:00","level":"INFO","msg":"stream: closing","id":"tihwy7if"}
+{"time":"2025-04-07T00:05:55.264840158+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-04-07T00:05:55.264861829+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-04-07T00:05:56.633915653+08:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-04-07T00:05:58.717919795+08:00","level":"INFO","msg":"handler: closed","stream_id":"tihwy7if"}
+{"time":"2025-04-07T00:05:58.717941164+08:00","level":"INFO","msg":"writer: Close: closed","stream_id":"tihwy7if"}
+{"time":"2025-04-07T00:05:58.717960955+08:00","level":"INFO","msg":"sender: closed","stream_id":"tihwy7if"}
+{"time":"2025-04-07T00:05:58.717975559+08:00","level":"INFO","msg":"stream: closed","id":"tihwy7if"}

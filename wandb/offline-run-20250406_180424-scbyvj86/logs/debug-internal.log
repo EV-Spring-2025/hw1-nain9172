@@ -1,0 +1,15 @@
+{"time":"2025-04-06T18:04:24.554157529+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.9","symlink path":"/home/ryan910702/hw1-nain9172/wandb/offline-run-20250406_180424-scbyvj86/logs/debug-core.log"}
+{"time":"2025-04-06T18:04:24.656612985+08:00","level":"WARN","msg":"GraphQL client is nil, skipping feature loading"}
+{"time":"2025-04-06T18:04:24.65667994+08:00","level":"INFO","msg":"created new stream","id":"scbyvj86"}
+{"time":"2025-04-06T18:04:24.656706185+08:00","level":"INFO","msg":"stream: started","id":"scbyvj86"}
+{"time":"2025-04-06T18:04:24.65673059+08:00","level":"INFO","msg":"handler: started","stream_id":"scbyvj86"}
+{"time":"2025-04-06T18:04:24.656752954+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"scbyvj86"}
+{"time":"2025-04-06T18:04:24.65674811+08:00","level":"INFO","msg":"sender: started","stream_id":"scbyvj86"}
+{"time":"2025-04-06T18:04:24.658618084+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-04-06T18:04:53.689260403+08:00","level":"INFO","msg":"stream: closing","id":"scbyvj86"}
+{"time":"2025-04-06T18:04:53.689275524+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-04-06T18:04:53.689295031+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-04-06T18:04:53.689342089+08:00","level":"INFO","msg":"handler: closed","stream_id":"scbyvj86"}
+{"time":"2025-04-06T18:04:53.689346996+08:00","level":"INFO","msg":"writer: Close: closed","stream_id":"scbyvj86"}
+{"time":"2025-04-06T18:04:53.689351071+08:00","level":"INFO","msg":"sender: closed","stream_id":"scbyvj86"}
+{"time":"2025-04-06T18:04:53.689398122+08:00","level":"INFO","msg":"stream: closed","id":"scbyvj86"}

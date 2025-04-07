@@ -1,0 +1,17 @@
+Video saved to outputs/video_0.mp4
+  0%|                                                                                                                                        | 0/10000 [00:00<?, ?it/s]/home/ryan910702/hw1-nain9172/torch_3dgs/trainer.py:70: UserWarning: Using a target size (torch.Size([49522])) that is different to the input size (torch.Size([49522, 1])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+  depth_loss = torch.nn.functional.l1_loss(output["depth"][mask], depth[mask])
+  0%|                                                                                                                                        | 0/10000 [00:00<?, ?it/s]
+Traceback (most recent call last):
+  File "/home/ryan910702/hw1-nain9172/run.py", line 53, in <module>
+    trainer.train()
+  File "/home/ryan910702/hw1-nain9172/torch_3dgs/trainer.py", line 122, in train
+    outputs = self.train_step()
+              ^^^^^^^^^^^^^^^^^
+  File "/home/ryan910702/hw1-nain9172/torch_3dgs/trainer.py", line 70, in train_step
+    depth_loss = torch.nn.functional.l1_loss(output["depth"][mask], depth[mask])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ryan910702/new2/envs/ev_hw1/lib/python3.11/site-packages/torch/nn/functional.py", line 3754, in l1_loss
+    return torch._C._nn.l1_loss(
+           ^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 9.14 GiB. GPU 0 has a total capacity of 23.54 GiB of which 5.41 GiB is free. Including non-PyTorch memory, this process has 18.11 GiB memory in use. Of the allocated memory 15.09 GiB is allocated by PyTorch, and 2.54 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)

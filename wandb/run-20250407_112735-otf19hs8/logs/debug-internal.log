@@ -1,0 +1,15 @@
+{"time":"2025-04-07T11:27:35.190871937+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.9","symlink path":"/home/ryan910702/hw1-nain9172/wandb/run-20250407_112735-otf19hs8/logs/debug-core.log"}
+{"time":"2025-04-07T11:27:35.491017343+08:00","level":"INFO","msg":"created new stream","id":"otf19hs8"}
+{"time":"2025-04-07T11:27:35.491036743+08:00","level":"INFO","msg":"stream: started","id":"otf19hs8"}
+{"time":"2025-04-07T11:27:35.491046804+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"otf19hs8"}
+{"time":"2025-04-07T11:27:35.491141692+08:00","level":"INFO","msg":"handler: started","stream_id":"otf19hs8"}
+{"time":"2025-04-07T11:27:35.491138353+08:00","level":"INFO","msg":"sender: started","stream_id":"otf19hs8"}
+{"time":"2025-04-07T11:27:35.753528019+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-04-07T12:48:45.812531302+08:00","level":"INFO","msg":"stream: closing","id":"otf19hs8"}
+{"time":"2025-04-07T12:48:45.812545433+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-04-07T12:48:45.812569242+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-04-07T12:48:46.591750308+08:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-04-07T12:48:47.073260365+08:00","level":"INFO","msg":"handler: closed","stream_id":"otf19hs8"}
+{"time":"2025-04-07T12:48:47.073286127+08:00","level":"INFO","msg":"writer: Close: closed","stream_id":"otf19hs8"}
+{"time":"2025-04-07T12:48:47.07329913+08:00","level":"INFO","msg":"sender: closed","stream_id":"otf19hs8"}
+{"time":"2025-04-07T12:48:47.073324926+08:00","level":"INFO","msg":"stream: closed","id":"otf19hs8"}

@@ -1,0 +1,15 @@
+{"time":"2025-04-06T23:29:00.55388153+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.9","symlink path":"/home/ryan910702/hw1-nain9172/wandb/run-20250406_232900-uwydz40r/logs/debug-core.log"}
+{"time":"2025-04-06T23:29:00.844430704+08:00","level":"INFO","msg":"created new stream","id":"uwydz40r"}
+{"time":"2025-04-06T23:29:00.844453787+08:00","level":"INFO","msg":"stream: started","id":"uwydz40r"}
+{"time":"2025-04-06T23:29:00.844525365+08:00","level":"INFO","msg":"handler: started","stream_id":"uwydz40r"}
+{"time":"2025-04-06T23:29:00.844529569+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"uwydz40r"}
+{"time":"2025-04-06T23:29:00.84454564+08:00","level":"INFO","msg":"sender: started","stream_id":"uwydz40r"}
+{"time":"2025-04-06T23:29:01.895037283+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-04-06T23:33:45.921271558+08:00","level":"INFO","msg":"stream: closing","id":"uwydz40r"}
+{"time":"2025-04-06T23:33:45.9212825+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-04-06T23:33:45.921332284+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-04-06T23:33:47.168689807+08:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-04-06T23:33:47.801691816+08:00","level":"INFO","msg":"handler: closed","stream_id":"uwydz40r"}
+{"time":"2025-04-06T23:33:47.801718703+08:00","level":"INFO","msg":"writer: Close: closed","stream_id":"uwydz40r"}
+{"time":"2025-04-06T23:33:47.80172263+08:00","level":"INFO","msg":"sender: closed","stream_id":"uwydz40r"}
+{"time":"2025-04-06T23:33:47.801765701+08:00","level":"INFO","msg":"stream: closed","id":"uwydz40r"}

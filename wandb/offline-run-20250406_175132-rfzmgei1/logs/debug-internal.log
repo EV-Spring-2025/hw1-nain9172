@@ -1,0 +1,15 @@
+{"time":"2025-04-06T17:51:32.706822869+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.9","symlink path":"/home/ryan910702/hw1-nain9172/wandb/offline-run-20250406_175132-rfzmgei1/logs/debug-core.log"}
+{"time":"2025-04-06T17:51:32.809803922+08:00","level":"WARN","msg":"GraphQL client is nil, skipping feature loading"}
+{"time":"2025-04-06T17:51:32.80985636+08:00","level":"INFO","msg":"created new stream","id":"rfzmgei1"}
+{"time":"2025-04-06T17:51:32.809878226+08:00","level":"INFO","msg":"stream: started","id":"rfzmgei1"}
+{"time":"2025-04-06T17:51:32.809886353+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"rfzmgei1"}
+{"time":"2025-04-06T17:51:32.809900018+08:00","level":"INFO","msg":"handler: started","stream_id":"rfzmgei1"}
+{"time":"2025-04-06T17:51:32.809932227+08:00","level":"INFO","msg":"sender: started","stream_id":"rfzmgei1"}
+{"time":"2025-04-06T17:51:32.81213413+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-04-06T17:51:33.813799913+08:00","level":"INFO","msg":"stream: closing","id":"rfzmgei1"}
+{"time":"2025-04-06T17:51:33.813813384+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-04-06T17:51:33.81386644+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-04-06T17:51:33.813905404+08:00","level":"INFO","msg":"handler: closed","stream_id":"rfzmgei1"}
+{"time":"2025-04-06T17:51:33.813910063+08:00","level":"INFO","msg":"writer: Close: closed","stream_id":"rfzmgei1"}
+{"time":"2025-04-06T17:51:33.813913706+08:00","level":"INFO","msg":"sender: closed","stream_id":"rfzmgei1"}
+{"time":"2025-04-06T17:51:33.813929267+08:00","level":"INFO","msg":"stream: closed","id":"rfzmgei1"}

@@ -1,0 +1,7 @@
+{"time":"2025-04-07T14:32:52.53549472+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.9","symlink path":"/home/ryan910702/hw1-nain9172/wandb/run-20250407_143252-1xd9l8d6/logs/debug-core.log"}
+{"time":"2025-04-07T14:32:52.82856272+08:00","level":"INFO","msg":"created new stream","id":"1xd9l8d6"}
+{"time":"2025-04-07T14:32:52.82859056+08:00","level":"INFO","msg":"stream: started","id":"1xd9l8d6"}
+{"time":"2025-04-07T14:32:52.828601554+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"1xd9l8d6"}
+{"time":"2025-04-07T14:32:52.828707295+08:00","level":"INFO","msg":"handler: started","stream_id":"1xd9l8d6"}
+{"time":"2025-04-07T14:32:52.828695835+08:00","level":"INFO","msg":"sender: started","stream_id":"1xd9l8d6"}
+{"time":"2025-04-07T14:32:53.094941073+08:00","level":"INFO","msg":"Starting system monitor"}

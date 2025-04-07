@@ -146,78 +146,100 @@ class GaussRenderer(nn.Module):
         return (color + 0.5).clamp(min=0.0)
 
     def render(self, camera, means2D, cov2d, color, opacity, depths):
-        radii = get_radius(cov2d)
-        rect_min, rect_max = get_rect(means2D, radii, camera.image_width, camera.image_height)
+      """
+      Render an image from 3D Gaussians by projecting them into 2D and 
+      performing tile-based splatting with alpha blending.
+      This method is inspired by the tile-based differentiable rasterizer in the paper :contentReference[oaicite:4]{index=4}.
+  
+      Args:
+          camera: Camera object with projection parameters.
+          means2D: Projected 2D coordinates of Gaussian centers.
+          cov2d: Projected 2D covariance matrices.
+          color: Colors associated with each Gaussian (evaluated via SH).
+          opacity: Per-Gaussian opacity.
+          depths: Depth values for each Gaussian.
+      
+      Returns:
+          A dictionary containing rendered color, depth, and alpha maps.
+      """
+      radii = get_radius(cov2d)
+      rect_min, rect_max = get_rect(means2D, radii, camera.image_width, camera.image_height)
+  
+      if self.pix_coord is None:
+          self.pix_coord = torch.stack(
+              torch.meshgrid(
+                  torch.arange(camera.image_height, device="cuda"),
+                  torch.arange(camera.image_width, device="cuda"),
+                  indexing="ij"
+              ), dim=-1
+          ).to("cuda")
+  
+      self.render_color = torch.ones(camera.image_height, camera.image_width, 3, device="cuda")
+      self.render_depth = torch.zeros(camera.image_height, camera.image_width, 1, device="cuda")
+      self.render_alpha = torch.zeros(camera.image_height, camera.image_width, 1, device="cuda")
+  
+      # Process the image in tiles for efficient rasterization
+      for h in range(0, camera.image_height, self.tile_size):
+          for w in range(0, camera.image_width, self.tile_size):
+              tile_h = min(self.tile_size, camera.image_height - h)
+              tile_w = min(self.tile_size, camera.image_width - w)
+              # Extract pixel coordinates for this tile.
+              tile_coord = self.pix_coord[h:h+tile_h, w:w+tile_w].reshape(-1, 2).float()
+  
+              # Cull Gaussians that do not affect this tile.
+              tile_mask = (
+                  (rect_max[:, 0] >= w) & (rect_min[:, 0] <= w + tile_w - 1) &
+                  (rect_max[:, 1] >= h) & (rect_min[:, 1] <= h + tile_h - 1)
+              )
+              if tile_mask.sum() == 0:
+                  continue
+              tile_indices = tile_mask.nonzero(as_tuple=True)[0]
+  
+              # Sort Gaussians by depth (closest first) as per the paper¡¦s visibility-aware splatting.
+              tile_depths = depths[tile_indices]
+              sorted_depths, sort_idx = torch.sort(tile_depths, descending=False)
+              sorted_indices = tile_indices[sort_idx]
+  
+              # Gather properties for sorted Gaussians.
+              sorted_means2D = means2D[sorted_indices]      # (M, 2)
+              sorted_cov2d = cov2d[sorted_indices]            # (M, 2, 2)
+              sorted_opacity = opacity[sorted_indices].view(-1, 1)
+              sorted_color = color[sorted_indices]            # (M, 3)
+  
+              # For each pixel in the tile, compute the Mahalanobis distance to each Gaussian center.
+              dxy = tile_coord[:, None, :] - sorted_means2D[None, :, :]  # (P, M, 2)
+              inv_cov = torch.linalg.inv(sorted_cov2d)  # (M, 2, 2)
+              inv_cov_exp = inv_cov.unsqueeze(0).expand(dxy.shape[0], -1, -1, -1)
+              dxy_exp = dxy.unsqueeze(-1)  # (P, M, 2, 1)
+              mahal = torch.matmul(dxy.unsqueeze(-2), torch.matmul(inv_cov_exp, dxy_exp))
+              mahal = mahal.squeeze(-1).squeeze(-1)  # (P, M)
+  
+              # Compute 2D Gaussian weights (£\_i) for splatting, following the paper's £\-blending model.
+              gauss_weight = torch.exp(-0.5 * mahal)  # (P, M)
+  
+              # Compute per-pixel contributions: weighted opacity, color, and depth.
+              A = sorted_opacity.T * gauss_weight  # (P, M)
+              # Compute cumulative transmittance T (front-to-back blending as in Eqs. 2-3 in the paper).
+              T = torch.cumprod(torch.cat([torch.ones((A.shape[0], 1), device=A.device), 1 - A + 1e-10], dim=1), dim=1)[:, :-1]
+              acc_alpha = (T * A).sum(dim=1)  # (P,)
+  
+              tile_color = (T.unsqueeze(-1) * A.unsqueeze(-1) * sorted_color.view(1, -1, 3)).sum(dim=1)
+              tile_depth = (T * A * sorted_depths.view(1, -1)).sum(dim=1)
+  
+              # Write computed tile results back to the full image buffers.
+              self.render_color[h:h+tile_h, w:w+tile_w, :] = tile_color.view(tile_h, tile_w, 3)
+              self.render_depth[h:h+tile_h, w:w+tile_w, :] = tile_depth.view(tile_h, tile_w, 1)
+              self.render_alpha[h:h+tile_h, w:w+tile_w, :] = acc_alpha.view(tile_h, tile_w, 1)
+  
+      return {
+          "render": self.render_color,
+          "depth": self.render_depth,
+          "alpha": self.render_alpha,
+          "visibility_filter": radii > 0,
+          "radii": radii
+      }
 
-        if self.pix_coord is None:
-            self.pix_coord = torch.stack(
-                torch.meshgrid(
-                    torch.arange(camera.image_width),
-                    torch.arange(camera.image_height),
-                    indexing="xy"
-                ), dim=-1).to("cuda")
 
-        self.render_color = torch.ones(*self.pix_coord.shape[:2], 3).to("cuda")
-        self.render_depth = torch.zeros(*self.pix_coord.shape[:2], 1).to("cuda")
-        self.render_alpha = torch.zeros(*self.pix_coord.shape[:2], 1).to("cuda")
-
-        for h in range(0, camera.image_height, self.tile_size):
-            for w in range(0, camera.image_width, self.tile_size):
-                over_tl = rect_min[..., 0].clamp(min=w), rect_min[..., 1].clamp(min=h)
-                over_br = rect_max[..., 0].clamp(max=w+self.tile_size-1), rect_max[..., 1].clamp(max=h+self.tile_size-1)
-                in_mask = (over_br[0] > over_tl[0]) & (over_br[1] > over_tl[1])
-                if not in_mask.any():
-                    continue
-                    
-                # TODO: Extract the pixel coordinates for this tile.
-                # Hint: The tile's pixel coordinates should be extracted using slicing and flattening.
-                # tile_coord = ...
-    
-                # TODO: Sort Gaussians by depth.
-                # Hint: Sorting should be based on the depth values of Gaussians.
-                # sorted_depths, index = ...
-    
-                # TODO: Extract relevant Gaussian properties for the tile.
-                # Hint: Use the computed index to rearrange the following tensors.
-                # sorted_means2D = ...
-                # sorted_cov2d = ...
-                # sorted_conic = ...
-                # sorted_opacity = ...
-                # sorted_color = ...
-    
-                # TODO: Compute the distance from each pixel in the tile to the Gaussian centers.
-                # Hint: This involves computing dx, dy between pixel coordinates and Gaussian centers.
-                # dx = ...
-                # dx_0, dx_1 = ...
-    
-                # TODO: Compute the 2D Gaussian weight for each pixel.
-                # Hint: The weight is determined by the Mahalanobis distance using the covariance matrix.
-                # gauss_weight = ...
-    
-                # TODO: Compute the alpha blending using transmittance (T).
-                # Hint: Ensure proper transparency blending by applying the alpha compositing formula.
-                # alpha = ...
-                # T = ...
-                # acc_alpha = ...
-    
-                # TODO: Compute the color and depth contributions.
-                # Hint: Perform weighted summation using computed transmittance and opacity.
-                # tile_color = ...
-                # tile_depth = ...
-    
-                # TODO: Store computed values into rendering buffers.
-                # Hint: Assign tile-wise computed values to corresponding locations in the full image buffers.
-                # self.render_color[h:h+self.tile_size, w:w+self.tile_size] = ...
-                # self.render_depth[h:h+self.tile_size, w:w+self.tile_size] = ...
-                # self.render_alpha[h:h+self.tile_size, w:w+self.tile_size] = ...
-
-        return {
-            "render": self.render_color,
-            "depth": self.render_depth,
-            "alpha": self.render_alpha,
-            "visibility_filter": radii > 0,
-            "radii": radii
-        }
 
     def forward(self, camera, pc):
         mean_ndc, mean_view, in_mask = projection_ndc(pc.xyz, camera.world_to_view, camera.projection)

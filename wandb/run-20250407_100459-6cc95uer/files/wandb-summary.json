@@ -1,0 +1,1 @@
+{"depth_loss":0.865,"rendered_video":{"sha256":"89c11e0913586780d6e10d616b3a18c3af63554ca7e96b08263c7bf0fe25549c","size":2239463,"path":"media/videos/rendered_video_0_89c11e0913586780d6e1.mp4","_type":"video-file"},"total_loss":0.216,"_runtime":142.296399621,"l1_loss":0.121,"psnr":13.876,"_wandb":{"runtime":143},"_step":162,"dssim_loss":0.08,"_timestamp":1.743991642023743e+09}

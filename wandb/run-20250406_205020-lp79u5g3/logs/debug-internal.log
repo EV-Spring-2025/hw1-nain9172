@@ -1,0 +1,15 @@
+{"time":"2025-04-06T20:50:20.468287764+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.9","symlink path":"/home/ryan910702/hw1-nain9172/wandb/run-20250406_205020-lp79u5g3/logs/debug-core.log"}
+{"time":"2025-04-06T20:50:20.761871312+08:00","level":"INFO","msg":"created new stream","id":"lp79u5g3"}
+{"time":"2025-04-06T20:50:20.761891036+08:00","level":"INFO","msg":"stream: started","id":"lp79u5g3"}
+{"time":"2025-04-06T20:50:20.761902353+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"lp79u5g3"}
+{"time":"2025-04-06T20:50:20.761984936+08:00","level":"INFO","msg":"handler: started","stream_id":"lp79u5g3"}
+{"time":"2025-04-06T20:50:20.761982954+08:00","level":"INFO","msg":"sender: started","stream_id":"lp79u5g3"}
+{"time":"2025-04-06T20:50:20.976134162+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-04-06T20:54:36.003431177+08:00","level":"INFO","msg":"stream: closing","id":"lp79u5g3"}
+{"time":"2025-04-06T20:54:36.003443657+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-04-06T20:54:36.003490292+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-04-06T20:54:37.115821339+08:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-04-06T20:54:37.308257678+08:00","level":"INFO","msg":"handler: closed","stream_id":"lp79u5g3"}
+{"time":"2025-04-06T20:54:37.308279784+08:00","level":"INFO","msg":"writer: Close: closed","stream_id":"lp79u5g3"}
+{"time":"2025-04-06T20:54:37.308293573+08:00","level":"INFO","msg":"sender: closed","stream_id":"lp79u5g3"}
+{"time":"2025-04-06T20:54:37.308315347+08:00","level":"INFO","msg":"stream: closed","id":"lp79u5g3"}

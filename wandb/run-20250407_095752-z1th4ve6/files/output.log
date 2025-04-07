@@ -1,0 +1,16 @@
+Video saved to outputs/video_0.mp4
+  0%|                                                                                                                                        | 0/10000 [00:00<?, ?it/s]/home/ryan910702/hw1-nain9172/torch_3dgs/trainer.py:62: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+/home/ryan910702/hw1-nain9172/torch_3dgs/trainer.py:66: UserWarning: Using a target size (torch.Size([19870])) that is different to the input size (torch.Size([19870, 1])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+  depth_loss = torch.nn.functional.l1_loss(output["depth"][mask], depth[mask])
+  0%|                                                                                                                                        | 0/10000 [00:00<?, ?it/s]
+Traceback (most recent call last):
+  File "/home/ryan910702/hw1-nain9172/run.py", line 53, in <module>
+    trainer.train()
+  File "/home/ryan910702/hw1-nain9172/torch_3dgs/trainer.py", line 118, in train
+    outputs = self.train_step()
+              ^^^^^^^^^^^^^^^^^
+  File "/home/ryan910702/hw1-nain9172/torch_3dgs/trainer.py", line 69, in train_step
+    scaler.scale(total_loss).backward()
+    ^^^^^^
+NameError: name 'scaler' is not defined

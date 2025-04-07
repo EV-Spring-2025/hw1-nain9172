@@ -1,0 +1,21 @@
+Traceback (most recent call last):
+  File "/home/ryan910702/hw1-nain9172/run.py", line 53, in <module>
+    trainer.train()
+  File "/home/ryan910702/hw1-nain9172/torch_3dgs/trainer.py", line 127, in train
+    self.eval_step(0)
+  File "/home/ryan910702/hw1-nain9172/torch_3dgs/trainer.py", line 104, in eval_step
+    output = self.gauss_render(pc=self.model, camera=camera)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ryan910702/new2/envs/ev_hw1/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ryan910702/new2/envs/ev_hw1/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ryan910702/hw1-nain9172/torch_3dgs/render.py", line 257, in forward
+    return self.render(camera, means2D, cov2d, color, pc.opacity, depths)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ryan910702/hw1-nain9172/torch_3dgs/render.py", line 205, in render
+    alpha = sorted_opacity.unsqueeze(0) * gauss_weight  # (P, G)
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~
+RuntimeError: The size of tensor a (82) must match the size of tensor b (4096) at non-singleton dimension 1
