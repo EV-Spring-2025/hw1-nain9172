@@ -198,7 +198,8 @@ Video saved to outputs/video_0.mp4
 Video saved to outputs/video_1000.mp4
  11%|████▊                                      | 1106/10000 [07:45<1:00:27,  2.45it/s, total_loss=0.179, l1_loss=0.118, dssim_loss=0.079, depth_loss=0.604, psnr=15.1]/home/ryan910702/hw1-nain9172/torch_3dgs/trainer.py:70: UserWarning: Using a target size (torch.Size([23780])) that is different to the input size (torch.Size([23780, 1])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
  12%|█████▍                                        | 1183/10000 [08:16<59:27,  2.47it/s, total_loss=0.187, l1_loss=0.109, dssim_loss=0.09, depth_loss=0.729, psnr=14.8]/home/ryan910702/hw1-nain9172/torch_3dgs/trainer.py:70: UserWarning: Using a target size (torch.Size([28679])) that is different to the input size (torch.Size([28679, 1])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
- 42%|███████████████████                          | 4227/10000 [29:50<38:48,  2.48it/s, total_loss=0.175, l1_loss=0.097, dssim_loss=0.096, depth_loss=0.686, psnr=15.3]
+ 56%|█████████████████████████                    | 5564/10000 [39:14<30:05,  2.46it/s, total_loss=0.154, l1_loss=0.103, dssim_loss=0.081, depth_loss=0.471, psnr=15.9]
 Video saved to outputs/video_2000.mp4
 Video saved to outputs/video_3000.mp4
 Video saved to outputs/video_4000.mp4
+Video saved to outputs/video_5000.mp4
