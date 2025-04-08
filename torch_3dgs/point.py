@@ -10,11 +10,10 @@ from  .camera import extract_camera_params
 def get_point_clouds(cameras, depths, alphas, rgbs=None):
     """
     Generates a 3D point cloud from camera parameters, depth maps, and optional RGB colors.
-    Inspired by the initialization procedure in 3D Gaussian Splatting :contentReference[oaicite:1]{index=1}.
 
     Args:
         cameras: Camera intrinsics and extrinsics.
-        depths: Depth maps of shape (N, H, W), where N is the number of images.
+        depths: Depth maps of shape (N, H, W), where N is the number of images.A
         alphas: Binary mask indicating valid depth points.
         rgbs: Optional RGB color values corresponding to depth points.
 
@@ -22,80 +21,76 @@ def get_point_clouds(cameras, depths, alphas, rgbs=None):
         PointCloud: A structured point cloud representation with 3D coordinates and color information.
     """
     Hs, Ws, intrinsics, c2ws = extract_camera_params(cameras)
-    W_val, H_val = int(Ws[0].item()), int(Hs[0].item())
-    all_points = []
-    all_rgba = []
-    num_images = cameras.shape[0]
-    device = depths.device
+    W, H = int(Ws[0].item()), int(Hs[0].item())
+    assert (depths.shape == alphas.shape)
+    coords = []
+    rgbas = []
 
-    for i in range(num_images):
-        intrinsic = intrinsics[i]  # 4x4
-        c2w = c2ws[i]              # 4x4
-        depth_img = depths[i]       # (H, W)
-        alpha_img = alphas[i]       # (H, W)
-        if rgbs is not None:
-            rgb_img = rgbs[i]       # (H, W, 3)
-
-        # Create a meshgrid for pixel coordinates (using pixel centers)
+    # TODO: Compute ray origins and directions for each pixel
+    for i in range(cameras.shape[0]):
+        # Get current image's camera parameters
+        intrinsic = intrinsics[i]  # (4, 4)
+        c2w = c2ws[i]              # (4, 4)
+        # Create meshgrid for pixel coordinates (using pixel centers)
         grid_y, grid_x = torch.meshgrid(
-            torch.arange(H_val, device=device, dtype=torch.float32),
-            torch.arange(W_val, device=device, dtype=torch.float32),
+            torch.arange(H, device=depths.device, dtype=torch.float32),
+            torch.arange(W, device=depths.device, dtype=torch.float32),
             indexing="ij"
         )
-        # Extract intrinsic parameters as per the camera model
+        # Extract intrinsic parameters (upper-left 3x3) and compute normalized image coordinates
         K = intrinsic[:3, :3]
-        fx, fy = K[0, 0], K[1, 1]
-        cx, cy = K[0, 2], K[1, 2]
-
-        # Compute normalized ray directions in camera coordinates (x, y, 1)
+        fx = K[0, 0]
+        fy = K[1, 1]
+        cx = K[0, 2]
+        cy = K[1, 2]
         x_cam = (grid_x - cx) / fx
         y_cam = (grid_y - cy) / fy
         ones = torch.ones_like(x_cam)
-        ray_dirs = torch.stack([x_cam, y_cam, ones], dim=-1)
-        ray_dirs = ray_dirs / torch.norm(ray_dirs, dim=-1, keepdim=True)
-
-        # Transform ray directions to world space using the camera's rotation matrix
+        # Form ray directions in camera space and normalize
+        ray_dirs_cam = torch.stack([x_cam, y_cam, ones], dim=-1)  # (H, W, 3)
+        ray_dirs_cam = ray_dirs_cam / torch.norm(ray_dirs_cam, dim=-1, keepdim=True)
+        # Transform ray directions to world space using the rotation part of c2w
         R = c2w[:3, :3]
-        ray_dirs_flat = ray_dirs.view(-1, 3)
-        ray_dirs_world = (R @ ray_dirs_flat.T).T
+        ray_dirs_world = torch.einsum('ij,hwj->hwi', R, ray_dirs_cam)
         ray_dirs_world = ray_dirs_world / torch.norm(ray_dirs_world, dim=-1, keepdim=True)
+        # The ray origin is the camera center (translation part of c2w)
+        ray_origin = c2w[:3, 3]
+        rays_o = ray_origin.expand(H, W, 3)  # (H, W, 3)
+        rays_d = ray_dirs_world           # (H, W, 3)
 
-        # The camera center is used as the ray origin (same for all pixels)
-        origin = c2w[:3, 3].unsqueeze(0).expand(ray_dirs_world.shape[0], 3)
-        # Compute 3D points via the ray equation (P = O + D * depth)
-        depth_flat = depth_img.view(-1)
-        pts = origin + depth_flat.unsqueeze(-1) * ray_dirs_world
+        # TODO: Compute 3D world coordinates using depth values
+        # Use the ray equation: P = O + D * depth
+        depth_img = depths[i]  # (H, W)
+        pts = rays_o + rays_d * depth_img.unsqueeze(-1)  # (H, W, 3)
 
-        # Use the alpha mask to select valid points (following paper's emphasis on using valid SfM points)
-        alpha_flat = alpha_img.view(-1)
-        valid_mask = alpha_flat > 0.5  # A threshold can be adjusted based on your data
-        valid_pts = pts[valid_mask]
-        all_points.append(valid_pts)
-
+        # TODO: Apply the alpha mask to filter valid points
+        # Mask valid points (and RGB if provided) using a threshold on alphas
+        mask = alphas[i] > 0.5  # (H, W)
+        valid_pts = pts[mask]   # (N_valid, 3)
+        coords.append(valid_pts)
         if rgbs is not None:
-            rgb_flat = rgb_img.view(-1, 3)
-            valid_rgb = rgb_flat[valid_mask]
-            valid_alpha = alpha_flat[valid_mask].unsqueeze(-1)
-            valid_rgba = torch.cat([valid_rgb, valid_alpha], dim=-1)
-            all_rgba.append(valid_rgba)
+            rgb_img = rgbs[i]  # (H, W, 3)
+            valid_rgba = torch.cat([rgb_img[mask], alphas[i][mask].unsqueeze(-1)], dim=-1)  # (N_valid, 4)
+            rgbas.append(valid_rgba)
 
-    # Concatenate points and (if available) color channels from all images.
-    coords = torch.cat(all_points, dim=0).cpu().numpy()
-    if rgbs is not None and all_rgba:
-        rgba = torch.cat(all_rgba, dim=0).cpu().numpy()
-        channels = {
-            "R": rgba[:, 0],
-            "G": rgba[:, 1],
-            "B": rgba[:, 2],
-            "A": rgba[:, 3],
-        }
+    if rgbs is not None and len(rgbas) > 0:
+        coords = torch.cat(coords, dim=0).cpu().numpy()
+        rgbas = torch.cat(rgbas, dim=0)
+    else:
+        coords = torch.cat(coords, dim=0).cpu().numpy()
+
+    if rgbs is not None:
+        channels = dict(
+            R=rgbas[..., 0].cpu().numpy(),
+            G=rgbas[..., 1].cpu().numpy(),
+            B=rgbas[..., 2].cpu().numpy(),
+            A=rgbas[..., 3].cpu().numpy(),
+        )
     else:
         channels = {}
 
     point_cloud = PointCloud(coords, channels)
     return point_cloud
-
-
 
 
 
