@@ -51,43 +51,49 @@ class Trainer:
         self.results_folder = Path(results_folder)
 
     def train_step(self) -> Dict[str, torch.Tensor]:
-      self.optimizer.zero_grad()
-      idx = np.random.choice(len(self.data["camera"]))
-      camera = to_viewpoint_camera(self.data["camera"][idx])
-      rgb = self.data["rgb"][idx]
-      depth = self.data["depth"][idx]
-      mask = self.data["alpha"][idx].bool()
-  
-      output = self.gauss_render(pc=self.model, camera=camera)
-  
-      # Compute L1 loss as the absolute pixel difference.
-      l1_loss = torch.nn.functional.l1_loss(output["render"], rgb)
-  
-      # Compute DSSIM loss (1 - SSIM) to capture perceptual differences.
-      dssim_loss = 1 - calc_ssim(output["render"], rgb)
-  
-      # Optionally include depth loss on valid (masked) regions.
-      depth_loss = torch.nn.functional.l1_loss(output["depth"][mask], depth[mask])
-  
-      # Combine losses using a weighting similar to the paper's formulation:
-      # L = (1 - £f) * L1 + £f * L_D-SSIM, where £f is set (e.g., 0.2)
-      total_loss = self.l1_weight * l1_loss + self.dssim_weight * dssim_loss + self.depth_weight * depth_loss
-  
-      total_loss.backward()
-      self.optimizer.step()
-  
-      psnr = calc_psnr(output["render"], rgb)
-      return {
-          "total_loss": total_loss,
-          "l1_loss": l1_loss,
-          "dssim_loss": dssim_loss,
-          "depth_loss": depth_loss,
-          "psnr": psnr,
-      }
+        self.optimizer.zero_grad()
+        idx = np.random.choice(len(self.data["camera"]))
+        camera = to_viewpoint_camera(self.data["camera"][idx])
+        rgb = self.data["rgb"][idx]
+        depth = self.data["depth"][idx]
+        mask = self.data["alpha"][idx].bool()
+    
+        output = self.gauss_render(pc=self.model, camera=camera)
+    
+        # ---------------------- losses ---------------------------------
+        # L1
+        l1_loss = torch.mean(torch.abs(output["render"] - rgb))
 
+        # DSSIM  ( 0.5 * (1 - SSIM) )
+        pred_img = output["render"].permute(2, 0, 1).unsqueeze(0)      # 1,C,H,W
+        gt_img   = rgb.permute(2, 0, 1).unsqueeze(0)
+        ssim_val = calc_ssim(pred_img, gt_img)
+        dssim_loss = 0.5 * (1.0 - ssim_val)
 
+        # Depth (masked L1)
+        depth_pred = output["depth"][..., 0]
+        depth_loss = torch.mean(torch.abs(depth_pred[mask] - depth[mask]))
 
+        # total weighted loss
+        total_loss = (
+            self.l1_weight  * l1_loss   +
+            self.dssim_weight * dssim_loss +
+            self.depth_weight * depth_loss
+        )
 
+    
+        total_loss.backward()
+        self.optimizer.step()
+    
+        psnr = calc_psnr(output["render"], rgb)
+    
+        return {
+            "total_loss": total_loss,
+            "l1_loss": l1_loss,
+            "dssim_loss": dssim_loss,
+            "depth_loss": depth_loss,
+            "psnr": psnr,
+        }
 
     def eval_step(self, step: int) -> None:
         frames = []
