@@ -1,14 +1,12 @@
 import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-
 import imageio
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
 from torch import nn
 from tqdm import trange
-
 from .camera import to_viewpoint_camera
 from .metric import *
 from .render import GaussRenderer
@@ -156,7 +154,6 @@ class Trainer:
     def save_video(self, image_list: List[np.ndarray], output_path: str, fps: int = 30) -> None:
         if not image_list:
             raise ValueError("image_list is empty!")
-
         writer = imageio.get_writer(output_path, fps=fps)
         for image in image_list:
             writer.append_data(image)
