@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     data = read_data(config.data_folder, resize_scale=config.resize_scale)
     data = dict_to_device(data, device)
-    sizes = [2]
+    sizes = [200, 100, 10, 2]
 
     for size in sizes:
         sub_data = bonus(data, size)
