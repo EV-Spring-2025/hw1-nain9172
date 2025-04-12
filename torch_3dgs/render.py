@@ -9,10 +9,8 @@ from .sh_utils import eval_sh
 def inverse_sigmoid(x: torch.Tensor) -> torch.Tensor:
     return torch.log(x / (1 - x))
 
-
 def homogeneous(points: torch.Tensor) -> torch.Tensor:
     return torch.cat([points, torch.ones_like(points[..., :1])], dim=-1)
-
 
 def build_rotation(q: torch.Tensor) -> torch.Tensor:
     q = F.normalize(q, dim=1)
@@ -29,7 +27,6 @@ def build_rotation(q: torch.Tensor) -> torch.Tensor:
     R[:, 2, 1] = 2 * (y * z + w * x)
     R[:, 2, 2] = 1 - 2 * (x**2 + y**2)
     return R
-
 
 def build_scaling_rotation(s: torch.Tensor, r: torch.Tensor) -> torch.Tensor:
     L = torch.zeros((s.shape[0], 3, 3), dtype=torch.float32, device=s.device)
@@ -55,7 +52,6 @@ def strip_symmetric(cov: torch.Tensor) -> torch.Tensor:
     out[:, 5] = cov[:, 2, 2]
     return out
 
-
 def projection_ndc(
     points: torch.Tensor,
     view_matrix: torch.Tensor,
@@ -70,7 +66,6 @@ def projection_ndc(
     in_mask = p_view[..., 2] >= 0.2
     return p_proj, p_view, in_mask
 
-
 def build_covariance_2d(
     mean3d: torch.Tensor,
     cov3d: torch.Tensor,
@@ -80,25 +75,20 @@ def build_covariance_2d(
     focal_x: float,
     focal_y:float,
 ) -> torch.Tensor:
-
     tan_fovx = math.tan(fov_x * 0.5)
     tan_fovy = math.tan(fov_y * 0.5)
     cam_space = mean3d @ view_matrix[:3, :3] + view_matrix[-1:, :3]
-
     tx = (cam_space[..., 0] / cam_space[..., 2]).clamp(-tan_fovx * 1.3, tan_fovx * 1.3) * cam_space[..., 2]
     ty = (cam_space[..., 1] / cam_space[..., 2]).clamp(-tan_fovy * 1.3, tan_fovy * 1.3) * cam_space[..., 2]
     tz = cam_space[..., 2]
-
     J = torch.zeros(mean3d.shape[0], 3, 3, device=mean3d.device)
     J[..., 0, 0] = focal_x / tz
     J[..., 0, 2] = -tx * focal_x / (tz * tz)
     J[..., 1, 1] = focal_y / tz
     J[..., 1, 2] = -ty * focal_y / (tz * tz)
-
     W = view_matrix[:3, :3].T
     cov2d = J @ W @ cov3d @ W.T @ J.permute(0, 2, 1)
     return cov2d[:, :2, :2] + torch.eye(2, device=cov2d.device)[None] * 0.3
-
 
 @torch.no_grad()
 def get_radius(cov2d: torch.Tensor) -> torch.Tensor:
@@ -108,7 +98,6 @@ def get_radius(cov2d: torch.Tensor) -> torch.Tensor:
     lambda2 = mid - torch.sqrt((mid**2 - det).clamp(min=0.1))
     return 3.0 * torch.sqrt(torch.max(lambda1, lambda2)).ceil()
 
-
 @torch.no_grad()
 def get_rect(
     pix_coord: torch.Tensor,
@@ -116,7 +105,6 @@ def get_rect(
     width: float,
     height: float,
 ) -> tuple[torch.Tensor, torch.Tensor]:
-
     rect_min = (pix_coord - radii[:, None])
     rect_max = (pix_coord + radii[:, None])
     rect_min[..., 0] = rect_min[..., 0].clamp(0, width - 1.0)
@@ -124,7 +112,6 @@ def get_rect(
     rect_max[..., 0] = rect_max[..., 0].clamp(0, width - 1.0)
     rect_max[..., 1] = rect_max[..., 1].clamp(0, height - 1.0)
     return rect_min, rect_max
-
 
 class GaussRenderer(nn.Module):
     def __init__(
@@ -148,7 +135,6 @@ class GaussRenderer(nn.Module):
     def render(self, camera, means2D, cov2d, color, opacity, depths):
         radii = get_radius(cov2d)
         rect_min, rect_max = get_rect(means2D, radii, camera.image_width, camera.image_height)
-
         if self.pix_coord is None:
             self.pix_coord = torch.stack(
                 torch.meshgrid(
@@ -173,14 +159,14 @@ class GaussRenderer(nn.Module):
                 tile_coord = self.pix_coord[h:h+self.tile_size,
                                              w:w+self.tile_size].reshape(-1, 2).float()
 
-                # depth‑sort the gaussians that overlap this tile --------
+                # depth?sort the gaussians that overlap this tile --------
                 sorted_depths, index = torch.sort(depths[in_mask], descending=False)
                 sorted_means2D = means2D[in_mask][index]
                 sorted_cov2d   = cov2d[in_mask][index]
                 sorted_opacity = opacity[in_mask][index, 0]
                 sorted_color   = color[in_mask][index]
 
-                # pre‑compute inverse covariances ------------------------
+                # pre?compute inverse covariances ------------------------
                 inv_cov = torch.linalg.inv(sorted_cov2d)                  # (M,2,2)
 
                 # delta to gaussian centres ------------------------------
@@ -198,7 +184,6 @@ class GaussRenderer(nn.Module):
 
                 weight = alpha_i * transmittance                               # (P,M)
                 acc_alpha = weight.sum(dim=-1, keepdim=True)                   # (P,1)
-
                 tile_color = (weight[..., None] * sorted_color).sum(dim=1)     # (P,3)
                 tile_depth = (weight * sorted_depths).sum(dim=1, keepdim=True) # (P,1)
                 tile_depth = tile_depth / (acc_alpha + 1e-6)
@@ -209,12 +194,9 @@ class GaussRenderer(nn.Module):
                 tile_color = tile_color.reshape(th, tw, 3)
                 tile_depth = tile_depth.reshape(th, tw, 1)
                 acc_alpha  = acc_alpha.reshape(th, tw, 1)
-
                 self.render_color[h:h+th, w:w+tw] = tile_color
                 self.render_depth[h:h+th, w:w+tw] = tile_depth
                 self.render_alpha[h:h+th, w:w+tw] = acc_alpha
-
-
         return {
             "render": self.render_color,
             "depth": self.render_depth,
@@ -241,7 +223,6 @@ class GaussRenderer(nn.Module):
             focal_x=camera.focal_x,
             focal_y=camera.focal_y
         )
-
         mean_coord_x = ((mean_ndc[..., 0] + 1) * camera.image_width - 1.0) * 0.5
         mean_coord_y = ((mean_ndc[..., 1] + 1) * camera.image_height - 1.0) * 0.5
         means2D = torch.stack([mean_coord_x, mean_coord_y], dim=-1)
