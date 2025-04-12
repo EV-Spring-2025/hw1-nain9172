@@ -1,9 +1,10 @@
 import random
 from typing import BinaryIO, Dict, List, Optional, Union
-
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 – activates 3D projection
+import open3d as o3d
 import numpy as np
 import torch
-
 from  .camera import extract_camera_params
 
 
@@ -65,7 +66,7 @@ def get_point_clouds(cameras, depths, alphas, rgbs=None):
 
         # TODO: Apply the alpha mask to filter valid points
         # Mask valid points (and RGB if provided) using a threshold on alphas
-        mask = alphas[i] > 0.5  # (H, W)
+        mask = alphas[i] > 0.5
         valid_pts = pts[mask]   # (N_valid, 3)
         coords.append(valid_pts)
         if rgbs is not None:
@@ -91,8 +92,6 @@ def get_point_clouds(cameras, depths, alphas, rgbs=None):
 
     point_cloud = PointCloud(coords, channels)
     return point_cloud
-
-
 
 
 def preprocess(data, channel):
@@ -152,7 +151,7 @@ class PointCloud:
 
     def farthest_point_sample(
         self, num_points: int, init_idx: Optional[int] = None, **subsample_kwargs
-    ) -> "PointCloud":
+        ) -> "PointCloud":
         """
         Sample a subset of the point cloud that is evenly distributed in space.
 
@@ -197,10 +196,6 @@ class PointCloud:
 
         new_coords = self.coords[indices]
         neighbor_indices = PointCloud(coords=new_coords, channels={}).nearest_points(self.coords)
-
-        # Make sure every point points to itself, which might not
-        # be the case if points are duplicated or there is rounding
-        # error.
         neighbor_indices[indices] = np.arange(len(indices))
 
         new_channels = {}
@@ -243,3 +238,72 @@ class PointCloud:
                 k: np.concatenate([v, other.channels[k]], axis=0) for k, v in self.channels.items()
             },
         )
+
+'''def show_point_cloud(
+    pc: PointCloud,
+    max_points: int = 100_000,
+    use_alpha: bool = False,
+    elev: float = 15,
+    azim: float = 45,
+    figsize: tuple = (8, 6),
+    ):
+    """
+    Display the point cloud in a matplotlib 3D scatter plot, coloring points by (R,G,B).
+
+    Args:
+        pc         : a PointCloud from get_point_clouds
+        max_points : random subsample limit for faster plotting
+        use_alpha  : if True and 'A' exists, incorporate alpha as blending
+        elev, azim : initial 3D viewing angles
+        figsize    : figure size (width, height) in inches
+    """
+    if len(pc.coords) == 0:
+        raise ValueError("No points to display!")
+
+    # 1) Subsample if large
+    sub_pc = pc.random_sample(max_points)
+
+    # 2) Extract xyz
+    xyz = sub_pc.coords  # shape (N, 3)
+
+    # 3) Build color array
+    if {"R", "G", "B"}.issubset(sub_pc.channels):
+        # If stored in [0..1], we can just unify
+        R = sub_pc.channels["R"]
+        G = sub_pc.channels["G"]
+        B = sub_pc.channels["B"]
+        # check if they're 0..1 or 0..255:
+        if R.max() > 1.0 or G.max() > 1.0 or B.max() > 1.0:
+            # assume 0..255
+            colors = np.stack([R, G, B], axis=-1) / 255.0
+        else:
+            colors = np.stack([R, G, B], axis=-1)
+
+        if use_alpha and ("A" in sub_pc.channels):
+            A = sub_pc.channels["A"]
+            if A.max() > 1.0:
+                A = A / 255.0
+            colors = np.concatenate([colors, A[:, None]], axis=-1)
+    else:
+        # Fallback single color
+        colors = "gray"
+
+    # 4) Plot
+    fig = plt.figure(figsize=figsize)
+    ax = fig.add_subplot(111, projection="3d")
+    ax.view_init(elev=elev, azim=azim)
+    ax.scatter(
+        xyz[:, 0],
+        xyz[:, 1],
+        xyz[:, 2],
+        c=colors,
+        s=0.5,
+        linewidth=0
+    )
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+    ax.set_zlabel("Z")
+    ax.set_title("Point Cloud Visualization")
+    ax.set_box_aspect((1, 1, 1))  # ensure equal scaling
+    plt.tight_layout()
+    plt.show()'''
