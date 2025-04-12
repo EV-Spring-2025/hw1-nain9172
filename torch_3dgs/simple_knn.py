@@ -23,5 +23,4 @@ def compute_mean_knn_dist(points: torch.Tensor, k: int = 3) -> torch.Tensor:
     # Find the k smallest distances for each point.
     knn_vals, _ = torch.topk(dists_sq, k, largest=False)
     mean_knn_dist = knn_vals.mean(dim=1)
-    #mean_knn_dist = torch.sqrt(torch.mean(knn_vals, dim=1))
     return mean_knn_dist
